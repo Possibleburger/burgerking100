@@ -1,4 +1,3 @@
-
 # Purpose: Simulates example
 # Author: Daniel Xu 
 # Date: 23 september 2024
@@ -8,22 +7,25 @@
 # Any other information needed? NA
 
 
-#### Workspace setup ####
+# Workspace setup 
 
 library(tidyverse)
 set.seed(100)
 
-#### Define neighbourhoods and years ####
+# Define neighbourhoods and years
 
-neighbourhoods <- 1:148 # neighbourhood numbers (in actual data not uniform 1-148 some numbers are not included so goes up to 174)
-years <- 2013:2023 # Range of years
+neighbourhood <- 1:148 # neighbourhood numbers (in actual data not uniform 1-148 some numbers are not included so goes up to 174)
+year <- 2013:2023 # Range of years
 
-#### Create combination of neighbourhoods and years ####
+#Create combination of neighbourhoods and years 
 
-data <- expand.grid(Neighbourhood = neighbourhoods, Years = years)
+data <- expand.grid(Neighbourhood = neighbourhood, Year = year)
+
+# Convert to tibble
+
 data <- as_tibble(data)
 
-#### Add crime statistic columns ####
+# Add crime statistic columns
 data <- data %>%
   mutate(
     Population = sample(5000:10000, nrow(data), replace = TRUE),
@@ -37,7 +39,12 @@ data <- data %>%
     Theftfrommv = sample(1:50, nrow(data), replace = TRUE),
     TheftOver = sample(1:50, nrow(data), replace = TRUE),
   )
-#### output data into file ####
+
+# Arrange by neighbourhood
+
+data <- data %>% arrange(Neighbourhood, Year)
+
+# output data into file
 write.csv(data, file = "data/raw_data/simulated.csv")
 
 
