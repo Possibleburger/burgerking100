@@ -1,10 +1,20 @@
-#### Workspace setup ####
+# Purpose: Cleans raw data
+# Author: Daniel Xu 
+# Date: 23 september 2024
+# Contact: danie.xu@mail.utoronto.ca
+# License: MIT
+# Pre-requisites: none
+# Any other information needed? NA
+
+# Workspace setup 
+
 library(tidyverse)
 
-#### Clean data ####
+# Clean data 
 raw_data <- read_csv("data/raw_data/raw_data.csv")
 
 # Create a new population column for each year
+
 cleaned_data <- raw_data %>%
   mutate(
     population_2014 = ASSAULT_2014 * 10000 / ASSAULT_RATE_2014,
@@ -20,9 +30,13 @@ cleaned_data <- raw_data %>%
   )
 
 # Remove the non-rate columns and Population 2023
+
 cleaned_data <- cleaned_data %>%
   select(-starts_with("ASSAULT_20"), -starts_with("AUTOTHEFT_20"), -starts_with("BIKETHEFT_20"),
          -starts_with("BREAKENTER_20"), -starts_with("HOMICIDE_20"), -starts_with("ROBBERY_20"),
-         -starts_with("SHOOTING_20"), -starts_with("THEFTFROMMV_20"), -starts_with("THEFTOVER_20"),-"POPULATION_2023")
-#### Save data ####
-write_csv(cleaned_data, "analysis.csv")
+         -starts_with("SHOOTING_20"), -starts_with("THEFTFROMMV_20"), -starts_with("THEFTOVER_20"),
+         -"POPULATION_2023",-"geometry")
+
+# Save data 
+
+write_csv(cleaned_data, "data/analysis_data/analysis_data.csv")
