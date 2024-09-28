@@ -1,44 +1,28 @@
-#### Preamble ####
-# Purpose: Cleans the raw plane data recorded by two observers..... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 6 April 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
-# License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
-
 #### Workspace setup ####
 library(tidyverse)
 
 #### Clean data ####
-raw_data <- read_csv("inputs/data/plane_data.csv")
+raw_data <- read_csv("data/raw_data/raw_data.csv")
 
-cleaned_data <-
-  raw_data |>
-  janitor::clean_names() |>
-  select(wing_width_mm, wing_length_mm, flying_time_sec_first_timer) |>
-  filter(wing_width_mm != "caw") |>
+# Create a new population column for each year
+cleaned_data <- raw_data %>%
   mutate(
-    flying_time_sec_first_timer = if_else(flying_time_sec_first_timer == "1,35",
-                                   "1.35",
-                                   flying_time_sec_first_timer)
-  ) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "490",
-                                 "49",
-                                 wing_width_mm)) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "6",
-                                 "60",
-                                 wing_width_mm)) |>
-  mutate(
-    wing_width_mm = as.numeric(wing_width_mm),
-    wing_length_mm = as.numeric(wing_length_mm),
-    flying_time_sec_first_timer = as.numeric(flying_time_sec_first_timer)
-  ) |>
-  rename(flying_time = flying_time_sec_first_timer,
-         width = wing_width_mm,
-         length = wing_length_mm
-         ) |> 
-  tidyr::drop_na()
+    population_2014 = ASSAULT_2014 * 10000 / ASSAULT_RATE_2014,
+    population_2015 = ASSAULT_2015 * 10000 / ASSAULT_RATE_2015,
+    population_2016 = ASSAULT_2016 * 10000 / ASSAULT_RATE_2016,
+    population_2017 = ASSAULT_2017 * 10000 / ASSAULT_RATE_2017,
+    population_2018 = ASSAULT_2018 * 10000 / ASSAULT_RATE_2018,
+    population_2019 = ASSAULT_2019 * 10000 / ASSAULT_RATE_2019,
+    population_2020 = ASSAULT_2020 * 10000 / ASSAULT_RATE_2020,
+    population_2021 = ASSAULT_2021 * 10000 / ASSAULT_RATE_2021,
+    population_2022 = ASSAULT_2022 * 10000 / ASSAULT_RATE_2022,
+    population_2023 = ASSAULT_2023 * 10000 / ASSAULT_RATE_2023
+  )
 
+# Remove the non-rate columns and Population 2023
+cleaned_data <- cleaned_data %>%
+  select(-starts_with("ASSAULT_20"), -starts_with("AUTOTHEFT_20"), -starts_with("BIKETHEFT_20"),
+         -starts_with("BREAKENTER_20"), -starts_with("HOMICIDE_20"), -starts_with("ROBBERY_20"),
+         -starts_with("SHOOTING_20"), -starts_with("THEFTFROMMV_20"), -starts_with("THEFTOVER_20"),-"POPULATION_2023")
 #### Save data ####
-write_csv(cleaned_data, "outputs/data/analysis_data.csv")
+write_csv(cleaned_data, "analysis.csv")
