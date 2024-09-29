@@ -3,18 +3,18 @@
 # Date: 23 september 2024
 # Contact: danie.xu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: none
+# Pre-requisites: raw_data file downloaded
 # Any other information needed? NA
 
 # Workspace setup 
 
 library(tidyverse)
 
-# Clean data 
+#load data
 raw_data <- read_csv("data/raw_data/raw_data.csv")
 
-# Create a new population column for each year
-
+#create a new population column for each year
+view(raw_data)
 cleaned_data <- raw_data %>%
   mutate(
     population_2014 = ASSAULT_2014 * 10000 / ASSAULT_RATE_2014,
@@ -29,7 +29,7 @@ cleaned_data <- raw_data %>%
     population_2023 = ASSAULT_2023 * 10000 / ASSAULT_RATE_2023
   )
 
-# Remove the non-rate columns and Population 2023
+#remove the non-rate, population2023, geometry columns
 
 cleaned_data <- cleaned_data %>%
   select(-starts_with("ASSAULT_20"), -starts_with("AUTOTHEFT_20"), -starts_with("BIKETHEFT_20"),
@@ -37,6 +37,21 @@ cleaned_data <- cleaned_data %>%
          -starts_with("SHOOTING_20"), -starts_with("THEFTFROMMV_20"), -starts_with("THEFTOVER_20"),
          -"POPULATION_2023",-"geometry")
 
-# Save data 
+#rearrange data to separate years from crime type
+
+cleaned_data <- pivot_longer(cleaned_data,4:103,names_to = "crime_type_and_year", values_to = "y") #pivot table to separate years
+cleaned_data <- cleaned_data %>%
+  mutate(year = str_extract(crime_type_and_year, "_\\d{4}"),     # extract year from crime_type_and_year
+         crime_type = str_remove(crime_type_and_year, "_\\d{4}"))  # remove the year from crime_type_and_year
+cleaned_data <- cleaned_data %>%
+  select(-"crime_type_and_year")
+
+#pivot the data wider so each crime type becomes a separate column
+
+cleaned_data <- cleaned_data %>%
+  pivot_wider(id_expand = FALSE,names_from = crime_type, values_from = y)
+cleaned_data$year <- gsub("_", "", cleaned_data$year)
+
+#save data 
 
 write_csv(cleaned_data, "data/analysis_data/analysis_data.csv")
